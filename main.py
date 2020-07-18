@@ -52,11 +52,11 @@ def main():
     accu = net.evaluate(x_test, labels=y_test)
     print('avgtime: ', avgtime)
     #print('accuracy: ', accuracy)
-
+    '''
     plt.plot(accuracy)
     plt.savefig('lr={}.jpg'.format(lr))
     plt.show()
-
+	'''
     print("final accuracy {}".format(accu))
 
 

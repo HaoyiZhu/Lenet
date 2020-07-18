@@ -416,7 +416,7 @@ class LeNet(object):
             duration = time.time() - last
             sum_time += duration
 
-            if epoch % 1 == 0:
+            if epoch % 5 == 0:
                 for i in self.train_layers:
                     self.net[i].training = False
 
