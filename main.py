@@ -13,7 +13,6 @@ def normalize_image(images):
     images = np.float64(images)
     images -= mean
     images /= std
-    # maybe pca will be better?
     return images
 
 def one_hot_labels(labels):
@@ -48,7 +47,7 @@ def main():
     net = LeNet()
 
     avgtime, accuracy = \
-        net.fit(x_train, y_train, x_test, y_test, epoches=40, batch_size=batch_size, lr=lr)
+        net.fit(x_train, y_train, x_test, y_test, epoches=5, batch_size=batch_size, lr=lr)
     accu = net.evaluate(x_test, labels=y_test)
     print('avgtime: ', avgtime)
     #print('accuracy: ', accuracy)

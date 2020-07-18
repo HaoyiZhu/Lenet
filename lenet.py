@@ -114,8 +114,6 @@ class Relu():
         return np.maximum(0, x)
 
     def backward(self, delta_in):
-        #if len(delta_in.shape) != len(self.x.shape):
-            #delta_in = delta_in.reshape(self.x.shape)
         delta_in[self.x <= 0] = 0
         return delta_in
 
@@ -203,7 +201,6 @@ class BN():
         self.mean=None
         self.var=None
         self.training = training
-        #self.activation = Relu()
 
     def forward(self,input,axis=1,momentum=0.95):
         if self.training:
@@ -230,7 +227,6 @@ class BN():
             self.outputu = self.gamma*self.xhut+self.beta
         else:
             self.outputu = self.test(input=input)
-        #self.outputs = self.activation.forward(self.outputu)
         self.outputs = self.outputu
 
     def test(self,input):
@@ -239,38 +235,37 @@ class BN():
         xhut = xmu * ivar
         return self.gamma*xhut+self.beta
 
-    def backward(self,dy,lr=0.09):
-        #dy = self.activation.backward(dy)
-        dxhut=dy*self.gamma
+    def backward(self,delta_in,lr=0.09):
+        dxhut=delta_in*self.gamma
         dx1=self.m*dxhut
         dx2=self.ivar**2*np.sum(dxhut*self.xmu,axis=self.axis,keepdims=True)*self.xmu
         dx3=np.sum(dxhut,axis=self.axis,keepdims=True)
         dx=self.ivar/self.m*(dx1-dx2-dx3)
 
-        dbeta=np.sum(dy,axis=self.axis,keepdims=True)
+        dbeta=np.sum(delta_in,axis=self.axis,keepdims=True)
         self.beta-=lr*dbeta
-        dgmama=np.sum(dy*self.xhut,axis=self.axis,keepdims=True)
+        dgmama=np.sum(delta_in*self.xhut,axis=self.axis,keepdims=True)
         self.gamma-=lr*dgmama
         self.delta_out = dx
 
 class DropOut(object):
     def __init__(self,  p=0.2, training=True):
         self.p = p
-        self.trainable = training
+        self.training = training
 
-    def forward(self, X):
-        scaler, mask = 1.0, np.ones(X.shape).astype(bool)
-        if self.trainable:
+    def forward(self, inputs):
+        scaler, mask = 1.0, np.ones(inputs.shape).astype(bool)
+        if self.training:
             scaler = 1.0 / (1.0 - self.p)
-            mask = np.random.rand(*X.shape) >= self.p
-            X = mask * X
+            mask = np.random.rand(*inputs.shape) >= self.p
+            inputs = mask * inputs
         self.mask = mask
-        self.outputs = scaler * X
+        self.outputs = scaler * inputs
 
-    def backward(self, dLdy, lr):
-        dLdy=self.mask*dLdy
-        dLdy *= 1.0 / (1.0 - self.p)
-        self.delta_out = dLdy
+    def backward(self, delta_in, lr):
+        delta_in=self.mask*delta_in
+        delta_in *= 1.0 / (1.0 - self.p)
+        self.delta_out = delta_in
 
 class LeNet(object):
     def __init__(self):
